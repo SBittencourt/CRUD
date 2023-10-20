@@ -1,0 +1,85 @@
+const mysql = require('mysql2/promise');
+
+async function run() {
+    const con = await mysql.createConnection({
+        host: 'localhost',
+        user: 'root',
+        password: 'fatec',
+        database: 'crud'
+    });
+
+    try {
+        // Deletar o banco de dados "crud" (se já existir)
+        await con.query("DROP DATABASE IF EXISTS crud");
+        console.log("Banco de dados 'crud' deletado (se existia)");
+
+        // Criar o banco de dados "crud"
+        await con.query("CREATE DATABASE crud");
+        console.log("Banco de dados 'crud' criado");
+
+        // Usar o banco de dados "crud"
+        await con.query("USE crud");
+
+        // Criar a tabela "clientes"
+        const createClientesTable = `
+            CREATE TABLE clientes (
+                id INT NOT NULL AUTO_INCREMENT,
+                nome VARCHAR(255) NOT NULL,
+                idade INT NOT NULL,
+                uf VARCHAR(20) NOT NULL,
+                PRIMARY KEY (id)
+            )
+        `;
+        await con.query(createClientesTable);
+        console.log("Tabela 'clientes' criada");
+
+        // Criar a tabela "produtos"
+        const createProdutosTable = `
+            CREATE TABLE produtos (
+                id INT NOT NULL AUTO_INCREMENT,
+                nome VARCHAR(255) NOT NULL,
+                preco INT NOT NULL,
+                PRIMARY KEY (id)
+            )
+        `;
+        await con.query(createProdutosTable);
+        console.log("Tabela 'produtos' criada");
+
+        // Inserir registros na tabela "clientes"
+        await con.query("INSERT INTO clientes (nome, idade, uf) VALUES ('Josefina', 89, 'PA')");
+        await con.query("INSERT INTO clientes (nome, idade, uf) VALUES ('André', 25, 'SP')");
+        await con.query("INSERT INTO clientes (nome, idade, uf) VALUES ('Alex', 38, 'RJ')");
+        console.log("Registros inseridos na tabela 'clientes'");
+
+        // Inserir registros na tabela "produtos"
+        await con.query("INSERT INTO produtos (nome, preco) VALUES ('Adesivo', 2)");
+        await con.query("INSERT INTO produtos (nome, preco) VALUES ('Caderno', 15)");
+        console.log("Registro inserido na tabela 'produtos'");
+
+        // Selecionar todos os registros da tabela "clientes"
+        const [clientes] = await con.query("SELECT * FROM clientes");
+        console.log("Registros da tabela 'clientes':", clientes);
+
+        // Selecionar produtos com nome "Adesivo"
+        const [produtos] = await con.query("SELECT * FROM produtos WHERE nome = 'Adesivo'");
+        console.log("Registros da tabela 'produtos' (Adesivo):", produtos);
+
+        // Deletar o registro "Josefina" da tabela "clientes"
+        const [deleteResult] = await con.query("DELETE FROM clientes WHERE nome = 'Josefina'");
+        console.log(`Registro(s) deletado(s) da tabela 'clientes': ${deleteResult.affectedRows}`);
+
+        // Atualizar o nome de "André" para "Luiza Mel" na tabela "clientes"
+        const [updateResult] = await con.query("UPDATE clientes SET nome = 'Luiza Mel' WHERE nome = 'André'");
+        console.log(`Registro(s) atualizado(s) na tabela 'clientes': ${updateResult.affectedRows}`);
+
+        // Juntar as tabelas "clientes" e "produtos" em uma consulta
+        const [joinResult] = await con.query("SELECT c.nome AS cliente, p.nome AS produto, p.preco FROM clientes c INNER JOIN produtos p ON c.id = p.id");
+        console.log("Resultado da junção de tabelas:", joinResult);
+    } catch (err) {
+        console.error("Erro:", err);
+    } finally {
+        con.end();
+    }
+}
+
+run();

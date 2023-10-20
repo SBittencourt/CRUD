@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lista de Clientes e Produtos</title>
+</head>
+<body>
+  <h1>Lista de Clientes e Produtos</h1>
+  
+  <h2>Clientes</h2>
+  <ul>
+    <% clientes.forEach(function(cliente) { %>
+      <li><%= cliente.nome %></li>
+    <% }); %>
+  </ul>
+
+  <h2>Produtos</h2>
+  <ul>
+    <% produtos.forEach(function(produto) { %>
+      <li><%= produto.cliente %> - <%= produto.produto %> - <%= produto.preco %></li>
+    <% }); %>
+  </ul>
+
+  <a href="/create">Adicionar Novo Cliente</a>
+</body>
+</html>
+
